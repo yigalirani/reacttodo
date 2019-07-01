@@ -40,10 +40,13 @@ function TodoList({list}){
 }
 function TodoApp(){
 	var [list,setList]=useState([{tx:'take over the world',key:333}])
+	function append_item(tx){
+		setList(list.concat([{tx,id:Date()}]))
+	}
 	return <section className='todoapp'>
 			<header className='header'>
 				<h1>todos</h1>
-				<Input  autofocus=""/>
+				<Input  autofocus="" onEnter={append_item}/>
 			</header>
 			<section className="main">
 				<input className="toggle-all" type="checkbox"/>
