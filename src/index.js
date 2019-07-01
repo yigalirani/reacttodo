@@ -42,6 +42,14 @@ function TodoList({list,onToggle}){
 function cp(x){
 	return Object.assign({}, x);
 }
+function update_list(list,key,cb){
+	var index=list.findIndex(x=>{return x.key==key})
+	if (index==-1)
+		return list
+	var item=list[index]
+	cb(item)
+	return [...list.slice(0,index),item,...list.slice(index+1)]
+}
 function TodoApp(){
 	var [list,setList]=useState([{tx:'take over the world',key:0,completed:true}])
 	var [key,setKey]=useState(1)
@@ -50,14 +58,10 @@ function TodoApp(){
 		setList(list.concat([{tx,key,completed:false}]))
 	}
 	function onToggle(key){
-		var index=list.findIndex(x=>{console.log('indexof',x); return x.key==key})
+		var index=list.findIndex(x=>{return x.key==key})
 		console.log('onToggle',key,index)
 		if (index!=-1)
-			var item=list[index]
-			item=Object.assign({},item,{completed:!item.completed})
-			console.log(item,item.id)
-			var new_list=[...list.slice(0,index),item,...list.slice(index+1)]
-			setList(new_list)
+			setList(update_list(list,key,item=>item.completed^=true))
 
 	}
 	return <section className='todoapp'>
