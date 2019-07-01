@@ -50,9 +50,28 @@ function update_list(list,key,cb){
 	cb(item)
 	return [...list.slice(0,index),item,...list.slice(index+1)]
 }
+function Tab({tab,selected_tab,setTab}){
+	return <li><a href={'#'+tab}>{tab},onClick={setTab(tab)}>{tab}</a> </li>
+}
+function activeTodoCount(list){
+	return list.filter(x=>!x.completed).length
+}
+function Footer({list,selected_tab,setTab,clear_completed}){
+	if (list.length==0)
+		return ''
+	var link_props={selected_tab,setTab}
+	return <footer className="footer">
+	<span id="todo-count"><strong>{activeTodoCount(list)}</strong> #activeTodoWord left</span>
+			<ul id="filters">
+				{['All','Active','Completed'].map(x=><Tab tab={x} {...link_props}/> )}
+			</ul>
+			<button className="clear-completed" onClick={clear_completed}>Clear completed</button>
+	</footer>
+}
 function TodoApp(){
-	var [list,setList]=useState([{tx:'take over the world',key:0,completed:true}])
+	var [list,setList]=useState([])
 	var [key,setKey]=useState(1)
+	var [tab,setTab]=useState('all')
 	function append_item(tx){
 		setKey(key+1)
 		setList(list.concat([{tx,key,completed:false}]))
@@ -74,7 +93,7 @@ function TodoApp(){
 				<label htmlFor="toggle-all">Mark all as complete</label>
 				<TodoList list={list} onToggle={onToggle}/>
 			</section>
-			<footer id="footer"></footer>			
+			<Footer list={list} setTab={setTab}/>		
 		</section>
 }
 ReactDOM.render(
