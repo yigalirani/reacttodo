@@ -18,9 +18,10 @@ function Input ({onEnter,onChanged}){//trickster input: shows num changes, repla
 			    <input className="new-todo" placeholder="What needs to be done?" type="text" value={text} onChange={onChange}/>
 		   </form>
 }
-function TodoItem({item,ontoggle,ondestroy}){
-	var checkbox_props={}
-	var li_props={key:item.key}
+function TodoItem({item,onToggle,ondestroy}){
+	console.log('render item',item)
+	var checkbox_props={onChange:_=>{console.log('to',item.key);onToggle(item.key)}}
+	var li_props={}
 	if (item.completed){
 		checkbox_props.checked='checked';
 		li_props.className='completed'
@@ -35,13 +36,29 @@ function TodoItem({item,ontoggle,ondestroy}){
 			</li>
 }
 
-function TodoList({list}){
-	return <ul className='todo-list'>{list.map(x=><TodoItem item={x} key={x.key}/>) }</ul>
+function TodoList({list,onToggle}){
+	return <ul className='todo-list'>{list.map(x=><TodoItem item={x} key={x.key} onToggle={onToggle}/>) }</ul>
+}
+function cp(x){
+	return Object.assign({}, x);
 }
 function TodoApp(){
-	var [list,setList]=useState([{tx:'take over the world',key:333}])
+	var [list,setList]=useState([{tx:'take over the world',key:0,completed:true}])
+	var [key,setKey]=useState(1)
 	function append_item(tx){
-		setList(list.concat([{tx,id:Date()}]))
+		setKey(key+1)
+		setList(list.concat([{tx,key,completed:false}]))
+	}
+	function onToggle(key){
+		var index=list.findIndex(x=>{console.log('indexof',x); return x.key==key})
+		console.log('onToggle',key,index)
+		if (index!=-1)
+			var item=list[index]
+			item=Object.assign({},item,{completed:!item.completed})
+			console.log(item,item.id)
+			var new_list=[...list.slice(0,index),item,...list.slice(index+1)]
+			setList(new_list)
+
 	}
 	return <section className='todoapp'>
 			<header className='header'>
@@ -51,7 +68,7 @@ function TodoApp(){
 			<section className="main">
 				<input className="toggle-all" type="checkbox"/>
 				<label htmlFor="toggle-all">Mark all as complete</label>
-				<TodoList list={list}/>
+				<TodoList list={list} onToggle={onToggle}/>
 			</section>
 			<footer id="footer"></footer>			
 		</section>
