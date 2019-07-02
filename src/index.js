@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import './base.css';
 document.querySelector('body').className ='learn-bar'
-function Input ({onEnter,onChanged}){//trickster input: shows num changes, replaces dwight with diapers
+function Input ({onEnter}){//trickster input: shows num changes, replaces dwight with diapers
 	var [text,setText]=useState('')
 	var onChange=(e)=>{
 		setText(e.target.value)
@@ -18,6 +18,26 @@ function Input ({onEnter,onChanged}){//trickster input: shows num changes, repla
 			    <input className="new-todo" placeholder="What needs to be done?" type="text" value={text} onChange={onChange}/>
 		   </form>
 }
+function BlurInput(props){//className,value
+	var [text,setText]=useState(props.inital_text)
+	function onChange(e){
+		setText(e.target.value)
+	}
+	function onBlur(){
+		props.onBlur(text,true)
+	}
+	function onKeyUp(e){
+		if (e.which === 13) {//enter key
+			props.onBlur(text,true)
+		}
+
+		if (e.which === 27) {//escape key
+			props.onBlur(text,false) //false, dont update the data
+		}		
+
+	}
+	return <input {...props} value={text} type="text" onBlur={onBlur} onChange={onChange} onKeyUp={onKeyUp}/>
+}
 function TodoItem({item,onToggle,ondestroy}){
 	console.log('render item',item)
 	var checkbox_props={onChange:_=>{console.log('to',item.key);onToggle(item.key)}}
@@ -26,13 +46,19 @@ function TodoItem({item,onToggle,ondestroy}){
 		checkbox_props.checked='checked';
 		li_props.className='completed'
 	}
-	return 	<li {...li_props}  >
+	var [editing,setEditing]=useState('')
+	function onBlur(tx,shuld_update){
+		setEditing('') 
+		console.log('onblue',tx,shuld_update)
+
+	}
+	return 	<li {...li_props}  className={editing}>
 				<div className="view">
 					<input className="toggle" type="checkbox" {...checkbox_props}/>
-					<label>{item.tx}</label>
+					<label onDoubleClick={x=>setEditing('editing')}>{item.tx}</label>
 					<button className="destroy" onClick={ondestroy}></button>
-					<input className="edit" />
 				</div>
+				<BlurInput className="edit" inital_text={item.tx} onBlur={onBlur}  autoFocus="yes"/>
 			</li>
 }
 
