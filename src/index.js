@@ -36,8 +36,14 @@ function TodoItem({item,onToggle,ondestroy}){
 			</li>
 }
 
-function TodoList({list,onToggle}){
-	return <ul className='todo-list'>{list.map(x=><TodoItem item={x} key={x.key} onToggle={onToggle}/>) }</ul>
+function TodoList({list,tab,onToggle}){
+	var filters={
+		All:x=>true,
+		Active:x=>!x.completed,
+		Completed:x=>x.completed
+	}
+	var filtered=list.filter(filters[tab]||(x=>true))
+	return <ul className='todo-list'>{filtered.map(x=><TodoItem item={x} key={x.key} onToggle={onToggle}/>) }</ul>
 }
 function cp(x){
 	return Object.assign({}, x);
@@ -51,18 +57,21 @@ function update_list(list,key,cb){
 	return [...list.slice(0,index),item,...list.slice(index+1)]
 }
 function Tab({tab,selected_tab,setTab}){
-	return <li><a href={'#'+tab}>{tab},onClick={setTab(tab)}>{tab}</a> </li>
+	return <li><a href={'#'+tab} onClick={x=>setTab(tab)}>{tab}</a> </li>
 }
 function activeTodoCount(list){
-	return list.filter(x=>!x.completed).length
+	var ans=list.filter(x=>!x.completed).length
+	if (ans==1)
+		return '1 item'
+	return ans+' items'
 }
 function Footer({list,selected_tab,setTab,clear_completed}){
 	if (list.length==0)
 		return ''
 	var link_props={selected_tab,setTab}
 	return <footer className="footer">
-	<span id="todo-count"><strong>{activeTodoCount(list)}</strong> #activeTodoWord left</span>
-			<ul id="filters">
+	<span className="todo-count"><strong>{activeTodoCount(list)}</strong> left</span>
+			<ul  className="filters">
 				{['All','Active','Completed'].map(x=><Tab tab={x} {...link_props}/> )}
 			</ul>
 			<button className="clear-completed" onClick={clear_completed}>Clear completed</button>
@@ -83,6 +92,7 @@ function TodoApp(){
 			setList(update_list(list,key,item=>item.completed^=true))
 
 	}
+
 	return <section className='todoapp'>
 			<header className='header'>
 				<h1>todos</h1>
@@ -91,7 +101,7 @@ function TodoApp(){
 			<section className="main">
 				<input className="toggle-all" type="checkbox"/>
 				<label htmlFor="toggle-all">Mark all as complete</label>
-				<TodoList list={list} onToggle={onToggle}/>
+				<TodoList list={list} tab={tab} onToggle={onToggle}/>
 			</section>
 			<Footer list={list} setTab={setTab}/>		
 		</section>
