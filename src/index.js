@@ -45,8 +45,8 @@ function TodoList({list,tab,onToggle}){
 	var filtered=list.filter(filters[tab]||(x=>true))
 	return <ul className='todo-list'>{filtered.map(x=><TodoItem item={x} key={x.key} onToggle={onToggle}/>) }</ul>
 }
-function cp(x){
-	return Object.assign({}, x);
+function cp(a,b){
+	return Object.assign({}, a,b);
 }
 function update_list(list,key,cb){
 	var index=list.findIndex(x=>{return x.key==key})
@@ -72,7 +72,7 @@ function Footer({list,selected_tab,setTab,clear_completed}){
 	return <footer className="footer">
 	<span className="todo-count"><strong>{activeTodoCount(list)}</strong> left</span>
 			<ul  className="filters">
-				{['All','Active','Completed'].map(x=><Tab tab={x} {...link_props}/> )}
+				{['All','Active','Completed'].map(x=><Tab tab={x} key={x} {...link_props}/> )}
 			</ul>
 			<button className="clear-completed" onClick={clear_completed}>Clear completed</button>
 	</footer>
@@ -96,14 +96,20 @@ function TodoApp(){
 		setList(list.filter(x=>!x.completed))
 	}
 
+	function toggle_all(){
+		console.log('toggle_all')
+		var completed=list.filter(x=>!x.completed).length>0
+		setList(list.map(x=>cp(x,{completed})))
+	}
+	var checked={checked:'checked'}
 	return <section className='todoapp'>
 			<header className='header'>
 				<h1>todos</h1>
 				<Input  autofocus="" onEnter={append_item}/>
 			</header>
 			<section className="main">
-				<input className="toggle-all" type="checkbox"/>
-				<label htmlFor="toggle-all">Mark all as complete</label>
+				<input className="toggle-all" type="checkbox" onChange={toggle_all} checked/>
+				<label htmlFor="toggle-all" onClick={toggle_all} >Mark all as complete  </label>
 				<TodoList list={list} tab={tab} onToggle={onToggle}/>
 			</section>
 			<Footer list={list} setTab={setTab} clear_completed={clear_completed}/>		
