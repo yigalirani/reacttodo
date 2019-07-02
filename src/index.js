@@ -92,6 +92,9 @@ function TodoApp(){
 			setList(update_list(list,key,item=>item.completed^=true))
 
 	}
+	function clear_completed(){
+		setList(list.filter(x=>!x.completed))
+	}
 
 	return <section className='todoapp'>
 			<header className='header'>
@@ -103,7 +106,7 @@ function TodoApp(){
 				<label htmlFor="toggle-all">Mark all as complete</label>
 				<TodoList list={list} tab={tab} onToggle={onToggle}/>
 			</section>
-			<Footer list={list} setTab={setTab}/>		
+			<Footer list={list} setTab={setTab} clear_completed={clear_completed}/>		
 		</section>
 }
 ReactDOM.render(
