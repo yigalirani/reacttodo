@@ -36,7 +36,7 @@ function BlurInput(props){//className,value
 		}		
 
 	}
-	return <input {...props} value={text} type="text" onBlur={onBlur} onChange={onChange} onKeyUp={onKeyUp}/>
+	return <input {...props} value={text} type="text" onBlur={onBlur} onChange={onChange} onKeyUp={onKeyUp} autoFocus="yes"/>
 }
 function TodoItem({item,onToggle,ondestroy,onChange}){
 	console.log('render item',item)
@@ -60,7 +60,7 @@ function TodoItem({item,onToggle,ondestroy,onChange}){
 					<label onDoubleClick={x=>setEditing('editing')}>{item.tx}</label>
 					<button className="destroy" onClick={ondestroy}></button>
 				</div>
-				<BlurInput className="edit" inital_text={item.tx} onBlur={onBlur}  autoFocus="yes"/>
+				<BlurInput className="edit" inital_text={item.tx} onBlur={onBlur}  />
 			</li>
 }
 
@@ -77,7 +77,7 @@ function cp(a,b){
 	return Object.assign({}, a,b);
 }
 function eq(a,b){
-	return (a.toLowerCase()==b.toLowerCase())
+	return (a.toLowerCase()===b.toLowerCase())
 }
 function update_list(list,key,cb){
 	var index=list.findIndex(x=>{return x.key==key})
@@ -115,13 +115,27 @@ function Footer({list,stab,setStab,clear_completed,tab}){
 function calcFilter() {
 	return document.location.hash.toLowerCase().substring(1)
 }
+function save(data){
+	localStorage.setItem('todo', JSON.stringify(data));
+}
+function load(){
+	return JSON.parse(localStorage.getItem('todo'))
+}
 function TodoApp(){
 	var [list,setList]=useState([])
 	var [key,setKey]=useState(1)
 	var [stab,setStab]=useState(calcFilter())//seed the state from url
+	useEffect(_=>{ //mu ha ha, saving state without using react!!
+		var the_list=load()||[]
+		setList(the_list)
+		setKey(Math.max(the_list.map(x=>x.key))+1)
+		return x=>save(list)
+	},[])
 	function append_item(tx){
 		setKey(key+1)
-		setList(list.concat([{tx,key,completed:false}]))
+		var new_list=list.concat([{tx,key,completed:false}])
+		setList(new_list)
+		save(new_list)
 	}
 	function onToggle(key){
 		var index=list.findIndex(x=>{return x.key==key})
