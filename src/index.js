@@ -36,7 +36,7 @@ function BlurInput(props){//className,value
 		}		
 
 	}
-	return <input {...props} value={text} type="text" onBlur={onBlur} onChange={onChange} onKeyUp={onKeyUp} autoFocus="yes"/>
+	return <input {...props} value={text} type="text" {...{onBlur,onChange,onKeyUp}} autoFocus="yes"/>
 }
 function TodoItem({item,onToggle,ondestroy,onChange}){
 	console.log('render item',item)
@@ -115,9 +115,7 @@ function Footer({list,stab,setStab,clear_completed,tab}){
 function calcFilter() {
 	return document.location.hash.toLowerCase().substring(1)
 }
-function save(data){
-	localStorage.setItem('todo', JSON.stringify(data));
-}
+
 function load(){
 	return JSON.parse(localStorage.getItem('todo'))
 }
@@ -125,6 +123,10 @@ function TodoApp(){
 	var [list,setList]=useState([])
 	var [key,setKey]=useState(1)
 	var [stab,setStab]=useState(calcFilter())//seed the state from url
+	function save(data){
+		localStorage.setItem('todo', JSON.stringify(data));
+		setList(data)
+	}	
 	useEffect(_=>{ //mu ha ha, saving state without using react!!
 		var the_list=load()||[]
 		setList(the_list)
@@ -134,27 +136,28 @@ function TodoApp(){
 	function append_item(tx){
 		setKey(key+1)
 		var new_list=list.concat([{tx,key,completed:false}])
-		setList(new_list)
 		save(new_list)
+	
 	}
 	function onToggle(key){
 		var index=list.findIndex(x=>{return x.key==key})
 		//console.log('onToggle',key,index)
 		if (index!=-1)
-			setList(update_list(list,key,item=>item.completed^=true))
+			save(update_list(list,key,item=>item.completed^=true))
 
 	}
 	function clear_completed(){
-		setList(list.filter(x=>!x.completed))
+		save(list.filter(x=>!x.completed))
 	}
 
 	function toggle_all(){
 		//console.log('toggle_all')
 		var completed=list.filter(x=>!x.completed).length>0
-		setList(list.map(x=>cp(x,{completed})))
+		save(list.map(x=>cp(x,{completed})))
 	}
-	function onChange(text,key){
-		setList(update_list(list,key,item=>item.text=text))
+	function onChange(tx,key){
+		save(update_list(list,key,item=>item.tx=tx))
+
 	}
 	var checked={checked:'checked'}
 	return <section className='todoapp'>
