@@ -24,6 +24,7 @@ function BlurInput(props){//className,value
 		setText(e.target.value)
 	}
 	function onBlur(){
+		console.log('onblur',text)
 		props.onBlur(text,true)
 	}
 	function onKeyUp(e){
@@ -39,8 +40,7 @@ function BlurInput(props){//className,value
 	return <input {...props} value={text} type="text" {...{onBlur,onChange,onKeyUp}} autoFocus="yes"/>
 }
 function TodoItem({item,onToggle,ondestroy,onChange}){
-	console.log('render item',item)
-	var checkbox_props={onChange:_=>{console.log('to',item.key);onToggle(item.key)},checked:''}
+	var checkbox_props={onChange:_=>{onToggle(item.key)},checked:''}
 	var [editing,setEditing]=useState('')
 	var li_props={className:editing}
 	if (item.completed){
@@ -51,27 +51,27 @@ function TodoItem({item,onToggle,ondestroy,onChange}){
 		setEditing('') 
 		if (shuld_update)
 			onChange(tx,item.key)
-		//console.log('onblue',tx,shuld_update)
-
+	}
+	function destory_clicked(){
+		ondestroy(item.key)
 	}
 	return 	<li {...li_props}>
 				<div className="view">
 					<input className="toggle" type="checkbox" {...checkbox_props}/>
 					<label onDoubleClick={x=>setEditing('editing')}>{item.tx}</label>
-					<button className="destroy" onClick={ondestroy}></button>
+					<button className="destroy" onClick={destory_clicked}></button>
 				</div>
 				<BlurInput className="edit" inital_text={item.tx} onBlur={onBlur}  />
 			</li>
 }
 
-function TodoList({list,stab,onToggle,onChange}){
-	console.log('tosolist',stab)
+function TodoList({list,stab,onToggle,onChange,ondestroy}){
 	var filters={
 		active:x=>!x.completed,
 		completed:x=>x.completed
 	}
 	var filtered=list.filter(filters[stab]||(x=>true))
-	return <ul className='todo-list'>{filtered.map(x=><TodoItem item={x} key={x.key} onToggle={onToggle} onChange={onChange}/>) }</ul>
+	return <ul className='todo-list'>{filtered.map(x=><TodoItem item={x} key={x.key} {...{onToggle,onChange,ondestroy}}/>) }</ul>
 }
 function cp(a,b){
 	return Object.assign({}, a,b);
@@ -89,7 +89,6 @@ function update_list(list,key,cb){
 }
 function Tab({tab,stab,setStab}){
 	var a={}
-	console.log('tab',stab,tab)
 	if (eq(tab,stab))
 		a.className='selected'
 	return <li><a href={'#'+tab} {...a} onClick={x=>setStab(tab.toLowerCase())}>{tab}</a> </li>
@@ -139,19 +138,21 @@ function TodoApp(){
 		save(new_list)
 	
 	}
+	function ondestroy(key){
+		var index=list.findIndex(x=>{return x.key==key})
+		if (index!=-1)
+			save([...list.slice(0,index),...list.slice(index+1)])
+	}
 	function onToggle(key){
 		var index=list.findIndex(x=>{return x.key==key})
-		//console.log('onToggle',key,index)
 		if (index!=-1)
 			save(update_list(list,key,item=>item.completed^=true))
-
 	}
 	function clear_completed(){
 		save(list.filter(x=>!x.completed))
 	}
 
 	function toggle_all(){
-		//console.log('toggle_all')
 		var completed=list.filter(x=>!x.completed).length>0
 		save(list.map(x=>cp(x,{completed})))
 	}
@@ -168,7 +169,7 @@ function TodoApp(){
 			<section className="main">
 				<input className="toggle-all" type="checkbox" onChange={toggle_all} checked/>
 				<label htmlFor="toggle-all" onClick={toggle_all} >Mark all as complete  </label>
-				<TodoList {...{list,stab,onToggle,onChange}}/>
+				<TodoList {...{list,stab,onToggle,onChange,ondestroy}}/>
 			</section>
 			<Footer {...{list,setStab,clear_completed,stab}}/>		
 		</section>
