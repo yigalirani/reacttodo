@@ -113,13 +113,7 @@ function Footer({list,stab,setStab,clear_completed,tab}){
 	</footer>
 }
 function calcFilter() {
-	var hash=document.location.hash.toLowerCase();
-	console.log('hash',hash)
-	switch (hash){
-		case '#active': return 'active';
-		case '#completed': return 'completed';
-		default:return 'all';
-	}
+	return document.location.hash.toLowerCase().substring(1)
 }
 function TodoApp(){
 	var [list,setList]=useState([])
