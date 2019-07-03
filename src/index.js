@@ -64,13 +64,13 @@ function TodoItem({item,onToggle,ondestroy,onChange}){
 			</li>
 }
 
-function TodoList({list,tab,onToggle,onChange}){
+function TodoList({list,stab,onToggle,onChange}){
+	console.log('tosolist',stab)
 	var filters={
-		All:x=>true,
-		Active:x=>!x.completed,
-		Completed:x=>x.completed
+		active:x=>!x.completed,
+		completed:x=>x.completed
 	}
-	var filtered=list.filter(filters[tab]||(x=>true))
+	var filtered=list.filter(filters[stab]||(x=>true))
 	return <ul className='todo-list'>{filtered.map(x=><TodoItem item={x} key={x.key} onToggle={onToggle} onChange={onChange}/>) }</ul>
 }
 function cp(a,b){
@@ -92,7 +92,7 @@ function Tab({tab,stab,setStab}){
 	console.log('tab',stab,tab)
 	if (eq(tab,stab))
 		a.className='selected'
-	return <li><a href={'#'+tab} {...a} onClick={x=>setStab(tab)}>{tab}</a> </li>
+	return <li><a href={'#'+tab} {...a} onClick={x=>setStab(tab.toLowerCase())}>{tab}</a> </li>
 }
 function activeTodoCount(list){
 	var ans=list.filter(x=>!x.completed).length
@@ -113,12 +113,14 @@ function Footer({list,stab,setStab,clear_completed,tab}){
 	</footer>
 }
 function calcFilter() {
-		switch (document.location.hash.toLowerCase()){
-			case '#/active': return 'active';
-			case '#/completed': return 'completed';
-			default:return 'all';
-		}
+	var hash=document.location.hash.toLowerCase();
+	console.log('hash',hash)
+	switch (hash){
+		case '#active': return 'active';
+		case '#completed': return 'completed';
+		default:return 'all';
 	}
+}
 function TodoApp(){
 	var [list,setList]=useState([])
 	var [key,setKey]=useState(1)
