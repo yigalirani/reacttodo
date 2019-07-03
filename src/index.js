@@ -15,7 +15,7 @@ function Input ({onEnter}){//trickster input: shows num changes, replaces dwight
 		setText('')
 	}	
 	return <form onSubmit={onSubmit} >
-			    <input className="new-todo" placeholder="What needs to be done?" type="text" value={text} onChange={onChange}/>
+			    <input autoFocus='yes' className="new-todo" placeholder="What needs to be done?" type="text" value={text} onChange={onChange}/>
 		   </form>
 }
 function BlurInput(props){//className,value
@@ -160,7 +160,7 @@ function TodoApp(){
 	return <section className='todoapp'>
 			<header className='header'>
 				<h1>todos</h1>
-				<Input  autofocus="" onEnter={append_item}/>
+				<Input  onEnter={append_item}/>
 			</header>
 			<section className="main">
 				<input className="toggle-all" type="checkbox" onChange={toggle_all} checked/>
