@@ -18,7 +18,7 @@ function Input ({onEnter}){
 			    <input autoFocus='yes' className="new-todo" placeholder="What needs to be done?" type="text" value={text} onChange={onChange}/>
 		   </form>
 }
-function BlurInput({inital_text,text_update}){
+function BlurInput({inital_text,update_text}){
 	var [text,setText]=useState(inital_text)
 	const input_ref=useRef()
 	useEffect(x=>{
@@ -29,14 +29,14 @@ function BlurInput({inital_text,text_update}){
 		setText(e.target.value)
 	}
 	function onBlur(){
-		text_update(text,true)
+		update_text(text,true)
 	}
 	function onKeyUp(e){
 		if (e.which === 13) {//enter key
-			text_update(text,true)
+			update_text(text,true)
 		}
 		if (e.which === 27) {//escape key
-			text_update(text,false) //false, dont update the data
+			update_text(text,false) //false, dont update the data
 		}		
 	}
 	return <input ref={input_ref} className='edit' value={text} type="text" {...{onBlur,onChange,onKeyUp}} autoFocus="yes"/>
@@ -54,18 +54,19 @@ function itemsModel([list,setList]){
 	function append_item(tx){
 		var keys=list.map(x=>x.key)
 		var key=calc_max(keys)+1//Math.max(...keys)+1
-    var new_list=list.concat([{tx,key,completed:false}])
+		//tx='yo, '+tx+', bro!'
+    	var new_list=list.concat([{tx,key,completed:false}])
 		save(new_list)
 	}
-	function ondestroy(key){
+	function delete_item(key){
 		var index=list.findIndex(x=>{return x.key===key})
 		if (index!==-1)
 			save([...list.slice(0,index),...list.slice(index+1)])
 	}
-	function onToggle(key){
+	function toggle_completed(key){
 		var index=list.findIndex(x=>{return x.key===key})
 		if (index!==-1)
-			save(update_list(list,key,item=>item.completed^=true))
+			save(_update_list(list,key,item=>item.completed^=true))
 	}
 	function clear_completed(){
 		save(list.filter(x=>!x.completed))
@@ -74,10 +75,10 @@ function itemsModel([list,setList]){
 		var completed=list.filter(x=>!x.completed).length>0
 		save(list.map(x=>cp(x,{completed})))
 	}
-	function onChange(tx,key){
-		save(update_list(list,key,item=>item.tx=tx))
+	function update_text(tx,key){
+		save(_update_list(list,key,item=>item.tx=tx))
 	}	
-	function update_list(list,key,cb){
+	function _update_list(list,key,cb){
 		var index=list.findIndex(x=>{return x.key===key})
 		if (index===-1)
 			return list
@@ -90,24 +91,24 @@ function itemsModel([list,setList]){
 		setList(new_list)
 	}
 
-	return {list,ondestroy,onToggle,clear_completed,toggle_all,onChange,load,save,append_item}	
+	return {list,delete_item,toggle_completed,clear_completed,toggle_all,update_text,load,append_item}	
 
 }
 function TodoItem({item,model}){
-	var checkbox_props={onChange:_=>{model.onToggle(item.key)},checked:''}
+	var checkbox_props={onChange:_=>{model.toggle_completed(item.key)},checked:''}
 	var [editing,setEditing]=useState('')
 	var li_props={className:editing}
 	if (item.completed){
 		checkbox_props.checked='checked';
 		li_props.className+=' completed'
 	}
-	function text_update(tx,shuld_update){
+	function update_text(tx,shuld_update){
 		setEditing('') 
 		if (shuld_update)
-			model.onChange(tx,item.key)
+			model.update_text(tx,item.key)
 	}
 	function destroy_item(){
-		model.ondestroy(item.key)
+		model.delete_item(item.key)
 	}
 	return 	<li {...li_props}>
 				<div className="view">
@@ -115,7 +116,7 @@ function TodoItem({item,model}){
 					<label onDoubleClick={x=>setEditing('editing')}>{item.tx}</label>
 					<button className="destroy" onClick={destroy_item}></button>
 				</div>
-				<BlurInput inital_text={item.tx} {...{text_update}}  />
+				<BlurInput inital_text={item.tx} {...{update_text}}  />
 			</li>
 }
 
@@ -167,8 +168,7 @@ function TodoApp(){
 
 	useEffect(_=>{ 
 		model.load()
-		return x=>model.save()
-	},[])
+	})
 
 	return <section className='todoapp'>
 			<header className='header'>
