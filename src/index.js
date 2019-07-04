@@ -3,12 +3,12 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import './base.css';
 document.querySelector('body').className ='learn-bar'
-function Input ({onEnter}){//trickster input: shows num changes, replaces dwight with diapers
+function Input ({onEnter}){
 	var [text,setText]=useState('')
-	var onChange=(e)=>{
+	function onChange(e){
 		setText(e.target.value)
 	}
-	var onSubmit=(e)=>{
+	function onSubmit(e){
 		e.preventDefault();
 		if (onEnter)
 			onEnter(e.target[0].value)
@@ -18,7 +18,7 @@ function Input ({onEnter}){//trickster input: shows num changes, replaces dwight
 			    <input autoFocus='yes' className="new-todo" placeholder="What needs to be done?" type="text" value={text} onChange={onChange}/>
 		   </form>
 }
-function BlurInput({inital_text,text_update}){//className,value
+function BlurInput({inital_text,text_update}){
 	var [text,setText]=useState(inital_text)
 	const input_ref=useRef()
 	useEffect(x=>{
@@ -58,19 +58,18 @@ function itemsModel([list,setList]){
 		save(new_list)
 	}
 	function ondestroy(key){
-		var index=list.findIndex(x=>{return x.key==key})
-		if (index!=-1)
+		var index=list.findIndex(x=>{return x.key===key})
+		if (index!==-1)
 			save([...list.slice(0,index),...list.slice(index+1)])
 	}
 	function onToggle(key){
-		var index=list.findIndex(x=>{return x.key==key})
-		if (index!=-1)
+		var index=list.findIndex(x=>{return x.key===key})
+		if (index!==-1)
 			save(update_list(list,key,item=>item.completed^=true))
 	}
 	function clear_completed(){
 		save(list.filter(x=>!x.completed))
 	}
-
 	function toggle_all(){
 		var completed=list.filter(x=>!x.completed).length>0
 		save(list.map(x=>cp(x,{completed})))
@@ -79,8 +78,8 @@ function itemsModel([list,setList]){
 		save(update_list(list,key,item=>item.tx=tx))
 	}	
 	function update_list(list,key,cb){
-		var index=list.findIndex(x=>{return x.key==key})
-		if (index==-1)
+		var index=list.findIndex(x=>{return x.key===key})
+		if (index===-1)
 			return list
 		var item=list[index]
 		cb(item)
@@ -106,9 +105,6 @@ function TodoItem({item,model}){
 		setEditing('') 
 		if (shuld_update)
 			model.onChange(tx,item.key)
-	}
-	function destory_clicked(){
-		model.ondestroy(item.key)
 	}
 	function destroy_item(){
 		model.ondestroy(item.key)
@@ -145,12 +141,12 @@ function Tab({tab,stab,setStab}){
 }
 function activeTodoCount(list){
 	var ans=list.filter(x=>!x.completed).length
-	if (ans==1)
+	if (ans===1)
 		return '1 item'
 	return ans+' items'
 }
 function Footer({setStab,model,stab}){
-	if (model.list.length==0)
+	if (model.list.length===0)
 		return ''
 	var link_props={stab,setStab}
 	return <footer className="footer">
@@ -169,12 +165,11 @@ function TodoApp(){
 	var model=itemsModel(useState([]))
 	var [stab,setStab]=useState(calcFilter())//seed the state from url
 
-	useEffect(_=>{ //mu ha ha, saving state without using react!!
+	useEffect(_=>{ 
 		model.load()
 		return x=>model.save()
 	},[])
 
-	var checked={checked:'checked'}
 	return <section className='todoapp'>
 			<header className='header'>
 				<h1>todos</h1>
