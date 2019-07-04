@@ -2,7 +2,6 @@ import React, { useState, useEffect,useRef}  from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import './base.css';
-document.querySelector('body').className ='learn-bar'
 function Input ({onEnter}){
 	var [text,setText]=useState('')
 	function onChange(e){
@@ -90,9 +89,7 @@ function itemsModel([list,setList]){
 		localStorage.setItem('todo', JSON.stringify(new_list||list));
 		setList(new_list)
 	}
-
 	return {list,delete_item,toggle_completed,clear_completed,toggle_all,update_text,load,append_item}	
-
 }
 function TodoItem({item,model}){
 	var checkbox_props={onChange:_=>{model.toggle_completed(item.key)},checked:''}
