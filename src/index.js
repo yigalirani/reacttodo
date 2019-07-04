@@ -1,4 +1,4 @@
-import React, { useState, useEffect }  from 'react';
+import React, { useState, useEffect,useRef}  from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import './base.css';
@@ -18,38 +18,44 @@ function Input ({onEnter}){//trickster input: shows num changes, replaces dwight
 			    <input autoFocus='yes' className="new-todo" placeholder="What needs to be done?" type="text" value={text} onChange={onChange}/>
 		   </form>
 }
-function BlurInput(props){//className,value
-	var [text,setText]=useState(props.inital_text)
+function BlurInput({inital_text,text_update}){//className,value
+	var [text,setText]=useState(inital_text)
+	const input_ref=useRef()
+	useEffect(x=>{
+		input_ref.current.focus()
+
+	})
 	function onChange(e){
 		setText(e.target.value)
 	}
 	function onBlur(){
-		console.log('onblur',text)
-		props.onBlur(text,true)
+		text_update(text,true)
 	}
 	function onKeyUp(e){
 		if (e.which === 13) {//enter key
-			props.onBlur(text,true)
+			text_update(text,true)
 		}
-
 		if (e.which === 27) {//escape key
-			props.onBlur(text,false) //false, dont update the data
+			text_update(text,false) //false, dont update the data
 		}		
 	}
-	return <input {...props} value={text} type="text" {...{onBlur,onChange,onKeyUp}} autoFocus="yes"/>
+	return <input ref={input_ref} className='edit' value={text} type="text" {...{onBlur,onChange,onKeyUp}} autoFocus="yes"/>
+}
+function calc_max(v){
+	var ans=0
+	v.forEach(x=>{if (x>ans) ans=x})
+	return ans
 }
 function itemsModel([list,setList]){
-	//var [list,setList]=useState([])
-	var key=Math.max(list.map(x=>x.key))+1
 	function load(){
 		var loaded_list=JSON.parse(localStorage.getItem('todo'))||[]
 		setList(loaded_list)
 	}
 	function append_item(tx){
-		key+=1
-		var new_list=list.concat([{tx,key,completed:false}])
+		var keys=list.map(x=>x.key)
+		var key=calc_max(keys)+1//Math.max(...keys)+1
+    var new_list=list.concat([{tx,key,completed:false}])
 		save(new_list)
-	
 	}
 	function ondestroy(key){
 		var index=list.findIndex(x=>{return x.key==key})
@@ -96,7 +102,7 @@ function TodoItem({item,model}){
 		checkbox_props.checked='checked';
 		li_props.className+=' completed'
 	}
-	function onBlur(tx,shuld_update){
+	function text_update(tx,shuld_update){
 		setEditing('') 
 		if (shuld_update)
 			model.onChange(tx,item.key)
@@ -113,7 +119,7 @@ function TodoItem({item,model}){
 					<label onDoubleClick={x=>setEditing('editing')}>{item.tx}</label>
 					<button className="destroy" onClick={destroy_item}></button>
 				</div>
-				<BlurInput className="edit" inital_text={item.tx} onBlur={onBlur}  />
+				<BlurInput inital_text={item.tx} {...{text_update}}  />
 			</li>
 }
 
