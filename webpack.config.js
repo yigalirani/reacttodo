@@ -1,5 +1,10 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 module.exports = {
+   externals: {
+    react: 'React',
+    'react-dom': 'ReactDOM'
+  },
+  //devtool: 'eval-source-map',  
   module: {
     rules: [
       {
