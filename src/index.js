@@ -24,7 +24,7 @@ function BlurInput({inital_text,update_text}){
 	useEffect(x=>{
 		input_ref.current.focus()
 
-	})
+	}, [])
 	function onChange(e){
 		setText(e.target.value)
 	}
@@ -93,7 +93,7 @@ function activeTodoCount(list){
 		return '1 item'
 	return ans+' items'
 }
-function Footer({setStab,model,stab}){
+function Footer({setStab,model,stab,the_text='hello footrt'}){
 	if (model.list.length===0)
 		return ''
 	var link_props={stab,setStab}
@@ -115,7 +115,7 @@ function TodoApp(){
 
 	useEffect(_=>{ 
 		model.load()
-	})
+	}, [])
 
 	return <section className='todoapp'>
 			<header className='header'>
